@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">test</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_nomor_1">Nomor 1</string>
+    <string name="menu_nomor_2">Nomor 2</string>
+    <string name="menu_nomor_3">Nomor 3</string>
+    <string name="menu_nomor_4">Nomor 4</string>
+</resources>

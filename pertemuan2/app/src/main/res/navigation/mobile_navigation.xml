@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_nomor_1">
+
+    <fragment
+        android:id="@+id/nav_nomor_1"
+        android:name="com.example.test.ui.satu.Nomor1Fragment"
+        android:label="@string/menu_nomor_1"
+        tools:layout="@layout/fragment_nomor_1" />
+
+    <fragment
+        android:id="@+id/nav_nomor_2"
+        android:name="com.example.test.ui.dua.Nomor2Fragment"
+        android:label="@string/menu_nomor_2"
+        tools:layout="@layout/fragment_nomor_2" />
+
+    <fragment
+        android:id="@+id/nav_nomor_3"
+        android:name="com.example.test.ui.tiga.Nomor3Fragment"
+        android:label="@string/menu_nomor_3"
+        tools:layout="@layout/fragment_nomor_3" />
+
+    <fragment
+        android:id="@+id/nav_nomor_4"
+        android:name="com.example.test.ui.empat.Nomor4Fragment"
+        android:label="@string/menu_nomor_4"
+        tools:layout="@layout/fragment_nomor_4" />
+</navigation>

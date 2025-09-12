@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/baseline_home_24"
+        android:title="Home"
+        android:iconTint="@color/white"></item>
+
+    <item
+        android:id="@+id/nav_restaurants"
+        android:icon="@drawable/baseline_restaurant_24"
+        android:title="Restaurants"
+        android:iconTint="@color/white"></item>
+
+    <item
+        android:id="@+id/nav_recipes"
+        android:icon="@drawable/outline_recipe_24"
+        android:title="Recipes"
+        android:iconTint="@color/white"></item>
+</menu>
