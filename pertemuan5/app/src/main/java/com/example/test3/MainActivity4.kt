@@ -24,7 +24,7 @@ class MainActivity4 : AppCompatActivity() {
             insets
         }
 
-        val intentPegawai = intent.getParcelableArrayListExtra<Pegawai>("dataPegawai")
+        val intentPegawai = intent.getParcelableArrayListExtra<Pegawai>(dataPegawai)
 
 // Memeriksa apakah intentPegawai tidak null dan ada data pegawai
         val isiText = StringBuilder()

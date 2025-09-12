@@ -7,27 +7,43 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity4"
     android:orientation="vertical"
-    android:layout_margin="16dp">
+    android:layout_margin="16dp"
+    android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Halaman 4"
-        android:textAlignment="center">
-    </TextView>
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/show_data_pegawai"
-        android:hint="Loading">
-    </TextView>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/show_data_pegawai"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:padding="8dp"
+            android:background="@android:drawable/editbox_background"/>
+
+    </ScrollView>
 
     <Button
+        android:id="@+id/btn_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Back"
-        android:id="@+id/btn_back">
-    </Button>
+        android:textAllCaps="false"
+        android:backgroundTint="@color/design_default_color_primary"
+        android:textColor="@android:color/white"/>
 
 </LinearLayout>

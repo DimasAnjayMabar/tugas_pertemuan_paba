@@ -5,14 +5,14 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import kotlin.math.log
 
 class MainActivity : AppCompatActivity() {
-
 
     override fun onStart() {
         super.onStart()
@@ -44,55 +44,68 @@ class MainActivity : AppCompatActivity() {
         Log.d("app saya", "on destroy berjalan")
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var _returnHasil: TextView
 
+    // PERBAIKAN: Gunakan ActivityResultContracts.StartActivityForResult()
+    private val resultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val selectedItem = result.data?.getStringExtra(
+                MainActivity5.SelectedItem // Pastikan ini sesuai dengan key di MainActivity5
+            )
+            _returnHasil.text = selectedItem ?: "Tidak ada data"
+        } else {
+            _returnHasil.text = "Tidak ada data yang dipilih"
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Inisialisasi _returnHasil
+        _returnHasil = findViewById(R.id.return_hasil) // Pastikan ada TextView dengan id ini di XML
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        var _btnExplisit1 = findViewById<Button>(R.id.btn_explisit_1)
-
+        val _btnExplisit1 = findViewById<Button>(R.id.btn_explisit_1)
         _btnExplisit1.setOnClickListener {
-            val intent = Intent(
-                this@MainActivity,
-                MainActivity2::class.java
-            )
-
+            val intent = Intent(this@MainActivity, MainActivity2::class.java)
             startActivity(intent)
         }
 
         val _dataKirim = findViewById<EditText>(R.id.data_kirim)
         val _submit = findViewById<Button>(R.id.btn_explisit_2)
-
         _submit.setOnClickListener {
-            val intentWithData = Intent(
-                this@MainActivity,
-                MainActivity3::class.java
-            ).apply {
+            val intentWithData = Intent(this@MainActivity, MainActivity3::class.java).apply {
                 putExtra(MainActivity3.dataTerima, _dataKirim.text.toString())
             }
             startActivity(intentWithData)
         }
 
-        val isiPegawai : ArrayList<Pegawai> = arrayListOf()
-
+        val isiPegawai: ArrayList<Pegawai> = arrayListOf()
         isiPegawai.add(Pegawai(1, "anita", "test"))
         isiPegawai.add(Pegawai(2, "tatik", "marketing"))
 
         val _btnExplisit3 = findViewById<Button>(R.id.btn_explisit_3)
         _btnExplisit3.setOnClickListener {
-            val intentWithData = Intent(
-                this@MainActivity,
-                MainActivity4::class.java
-            ).apply {
+            val intentWithData = Intent(this@MainActivity, MainActivity4::class.java).apply {
                 putExtra(MainActivity4.dataPegawai, isiPegawai)
             }
             startActivity(intentWithData)
+        }
+
+        // Tambahkan button untuk MainActivity5 jika perlu
+        val _btnExplisit5 = findViewById<Button>(R.id.btn_explisit_4) // Pastikan ada button ini di XML
+        _btnExplisit5?.setOnClickListener {
+            val intent = Intent(this@MainActivity, MainActivity5::class.java)
+            resultLauncher.launch(intent)
         }
 
         Log.d("app saya", "oncreate berjalan")

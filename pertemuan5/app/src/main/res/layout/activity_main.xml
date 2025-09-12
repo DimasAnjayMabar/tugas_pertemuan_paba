@@ -38,4 +38,18 @@
         android:text="Send Data">
     </Button>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_explisit_4"
+        android:text="Choose Something">
+    </Button>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/return_hasil"
+        android:gravity="center"
+        android:hint="Waiting for selection">
+    </TextView>
 </LinearLayout>
