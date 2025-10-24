@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileFragment"
+    android:background="#92DDFF">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Profile Fragment"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:id="@+id/buttonOpen"
+            android:layout_height="wrap_content"
+            android:text="Detail Profile"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="32dp"/>
+
+    </LinearLayout>
+
+
+</FrameLayout>
