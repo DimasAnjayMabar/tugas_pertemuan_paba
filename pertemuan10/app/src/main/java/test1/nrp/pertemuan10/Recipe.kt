@@ -2,9 +2,10 @@ package test1.nrp.pertemuan10
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.os.DropBoxManager
+import android.view.GestureDetector
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -13,6 +14,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 
 // TODO: Rename parameter arguments, choose names that match
@@ -108,6 +110,113 @@ class Recipe : Fragment() {
         builder.create().show()
     }
 
+    private fun showActionDialog(
+        position: Int,
+        selectedItem: Pair<String, String>,
+        data: MutableList<Pair<String, String>>,
+        adapter: ArrayAdapter<String>
+    ){
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Item $selectedItem")
+        builder.setMessage("What do you want to do with this data?")
+
+        builder.setPositiveButton("Update"){_, _ ->
+            showUpdateDialog(position, selectedItem, data, adapter)
+        }
+        builder.setNegativeButton("Delete"){_, _ ->
+            data.removeAt(position)
+
+            val updatedDisplay = data.map { (kategori, bahan) -> "$kategori: $bahan" }
+
+            adapter.clear()
+            adapter.addAll(updatedDisplay)
+            adapter.notifyDataSetChanged()
+            Toast.makeText(
+                requireContext(),
+                "$selectedItem deleted",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        builder.setNeutralButton("Cancel") {dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.create().show()
+    }
+
+    private fun showUpdateDialog(
+        position: Int,
+        oldValue: Pair<String, String>,
+        data: MutableList<Pair<String, String>>,
+        adapter: ArrayAdapter<String>
+    ) {
+        val (oldCategory, oldIngredient) = oldValue
+
+        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        builder.setTitle("Update Ingredient")
+
+        val layout = LinearLayout(requireContext())
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 40, 50, 10)
+
+        // Category Spinner
+        val spinnerCategory = Spinner(requireContext())
+        val categories = arrayOf("Utama", "Bumbu", "Tambahan")
+        val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCategory.adapter = spinnerAdapter
+
+        // Set the spinner to old category
+        val selectedIndex = categories.indexOf(oldCategory)
+        if (selectedIndex >= 0) spinnerCategory.setSelection(selectedIndex)
+
+        // Ingredient input
+        val etIngredient = EditText(requireContext())
+        etIngredient.hint = "Enter new ingredient"
+        etIngredient.setText(oldIngredient)
+
+        // Add views
+        layout.addView(spinnerCategory)
+        layout.addView(etIngredient)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Save") { dialog, _ ->
+            val newCategory = spinnerCategory.selectedItem as String
+            val newIngredient = etIngredient.text.toString().trim()
+
+            if (newIngredient.isNotEmpty()) {
+                // Update the data pair
+                data[position] = newCategory to newIngredient
+
+                // Refresh displayed list
+                val updatedDisplay = data.map { (cat, ing) -> "$cat: $ing" }
+                adapter.clear()
+                adapter.addAll(updatedDisplay)
+                adapter.notifyDataSetChanged()
+
+                Toast.makeText(
+                    requireContext(),
+                    "Updated to: $newCategory - $newIngredient",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Ingredient name cannot be empty",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.create().show()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -140,6 +249,24 @@ class Recipe : Fragment() {
         val addBtn = view.findViewById<Button>(R.id.add_button)
         addBtn.setOnClickListener {
             showAddRecipeDialog()
+        }
+
+        val gestureDetector = GestureDetector(
+            requireContext(),
+            object : GestureDetector.SimpleOnGestureListener(){
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    val position = lv1.pointToPosition(e.x.toInt(), e.y.toInt())
+                    if(position != ListView.INVALID_POSITION){
+                        val selectedItem = data[position]
+                        showActionDialog(position, selectedItem, data, lvAdapter)
+                    }
+                    return true
+                }
+            }
+        )
+
+        lv1.setOnTouchListener {_, event ->
+            gestureDetector.onTouchEvent(event)
         }
     }
 
