@@ -63,7 +63,8 @@ class MainActivity : AppCompatActivity() {
         val topLevelDestination = setOf(
             R.id.homeFragment,
             R.id.profileFragment,
-            R.id.settingsFragment
+            R.id.settingsFragment,
+            R.id.recipe
         )
 
         appBarConfiguration = AppBarConfiguration(

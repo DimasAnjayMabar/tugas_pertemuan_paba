@@ -14,6 +14,10 @@
             android:id="@+id/settingsFragment"
             android:icon="@drawable/outline_build_24"
             android:title="Settings"/>
+        <item
+            android:id="@+id/recipe"
+            android:icon="@drawable/outline_book_4_24"
+            android:title="Recipe"/>
     </group>
 
     <item android:title="Confidential">
