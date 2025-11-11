@@ -2,6 +2,7 @@ package com.example.pertemuan12
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -14,10 +15,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.edit
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
 
 class adapterRecView (private val listWayang : ArrayList<DcWayang>) : RecyclerView.Adapter<adapterRecView.ListViewHolder>(){
@@ -70,10 +74,11 @@ class adapterRecView (private val listWayang : ArrayList<DcWayang>) : RecyclerVi
 }
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var nama : MutableList<String>
-    private lateinit var karakter : MutableList<String>
-    private lateinit var deskripsi : MutableList<String>
-    private lateinit var gambar : MutableList<String>
+    private var nama : MutableList<String> = emptyList<String>().toMutableList()
+    private var karakter : MutableList<String> = emptyList<String>().toMutableList()
+    private var deskripsi : MutableList<String> = emptyList<String>().toMutableList()
+    private var gambar : MutableList<String> = emptyList<String>().toMutableList()
+    lateinit var sp : SharedPreferences
     private var arrayListWayang = arrayListOf<DcWayang>()
     private lateinit var rvWayang : RecyclerView
 
@@ -85,15 +90,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun tambahData(){
-        arrayListWayang.clear()
-        for(position in nama.indices){
-            val data = DcWayang(
-                gambar[position],
-                nama[position],
-                karakter[position],
-                deskripsi[position]
-            )
-            arrayListWayang.add(data)
+        val gson = Gson()
+        sp.edit{
+            arrayListWayang.clear()
+
+            for (position in nama.indices){
+                val data = DcWayang(
+                    gambar[position],
+                    nama[position],
+                    karakter[position],
+                    deskripsi[position]
+                )
+                arrayListWayang.add(data)
+            }
+
+            val json = gson.toJson(arrayListWayang)
+            putString("spWayang", json)
         }
     }
 
@@ -140,6 +152,26 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        sp = getSharedPreferences("dataSp", MODE_PRIVATE)
+
+        val gson = Gson()
+        val isiSp = sp.getString("spWayang", null)
+        val type = object : TypeToken<ArrayList<DcWayang>>() {}.type
+        if(isiSp != null)
+            arrayListWayang = gson.fromJson(isiSp, type)
+
+        if(arrayListWayang.size==0){
+            siapkanData()
+        }else{
+            arrayListWayang.forEach{
+                nama.add(it.nama)
+                gambar.add(it.foto)
+                deskripsi.add(it.deskripsi)
+                karakter.add(it.karakter)
+            }
+            arrayListWayang.clear()
+        }
 
         rvWayang = findViewById<RecyclerView>(R.id.rv_wayang)
 
