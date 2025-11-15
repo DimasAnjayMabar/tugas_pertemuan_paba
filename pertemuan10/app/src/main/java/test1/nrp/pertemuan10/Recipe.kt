@@ -23,11 +23,13 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
+import test1.nrp.pertemuan10.databinding.FragmentRecipeBinding
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,7 +54,13 @@ class Recipe : Fragment() {
 
     private lateinit var sharedPreferences: SharedPreferences
 
-    private val DATA_KEY = "recipe_data"
+    private lateinit var wishlistPreferences: SharedPreferences
+
+    private val WISHLIST_KEY = "dt_cart"
+
+    private val DATA_KEY = "dt_recipe"
+
+    private var binding: FragmentRecipeBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +71,7 @@ class Recipe : Fragment() {
         setHasOptionsMenu(true)
 
         sharedPreferences = requireContext().getSharedPreferences("recipe_prefs", Context.MODE_PRIVATE)
+        wishlistPreferences = requireContext().getSharedPreferences("wishlist_prefs", Context.MODE_PRIVATE)
 
         loadData()
     }
@@ -83,11 +92,9 @@ class Recipe : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
             R.id.action_cart -> {
-                Toast.makeText(
-                    requireContext(),
-                    "Cart Clicked",
-                    Toast.LENGTH_SHORT
-                ).show()
+                findNavController().navigate(
+                    R.id.action_recipe_to_cartFragment
+                )
                 true
             }
             R.id.action_add_recipe -> {
@@ -95,6 +102,47 @@ class Recipe : Fragment() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun addToWishlist(item: Triple<String, String, String>){
+        val gson = Gson()
+
+        val existingWishlist = loadWishlist()
+
+        val isAlreadyInWishlist = existingWishlist.any { it.second == item.second}
+
+        if(isAlreadyInWishlist){
+            Toast.makeText(
+                requireContext(),
+                "${item.second} already in wishlist",
+                Toast.LENGTH_SHORT
+            ).show()
+        }else{
+            existingWishlist.add(item)
+
+            val editor = wishlistPreferences.edit()
+            val json = gson.toJson(existingWishlist)
+            editor.putString(WISHLIST_KEY, json)
+            editor.apply()
+
+            Toast.makeText(
+                requireContext(),
+                "${item.second} added to wishlist",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun loadWishlist(): MutableList<Triple<String, String, String>>{
+        val gson = Gson()
+        val json = wishlistPreferences.getString(WISHLIST_KEY, null)
+        val type = object : TypeToken<MutableList<Triple<String, String, String>>>() {}.type
+
+        return if (json != null){
+            gson.fromJson(json, type)
+        }else{
+            mutableListOf()
         }
     }
 
@@ -116,7 +164,7 @@ class Recipe : Fragment() {
         }else{
             data.addAll(listOf(
                 Triple("Utama", "Ayam", ""),
-                Triple("Utama", "Telur", "https://example.com/images/telur.jpg"),
+                Triple("Utama", "Telur", ""),
                 Triple("Bumbu", "Bawang Merah", "https://example.com/images/bawang_merah.jpg"),
                 Triple("Bumbu", "Bawang Putih", "https://example.com/images/bawang_putih.jpg"),
                 Triple("Bumbu", "Kecap Manis", "https://example.com/images/kecap_manis.jpg"),
@@ -292,9 +340,15 @@ class Recipe : Fragment() {
         rvRecipe = view.findViewById(R.id.rv_recipe)
         rvRecipe.layoutManager = LinearLayoutManager(requireContext())
 
-        rvAdapter = RecipeAdapter(data) {position, selectedItem ->
-            showActionDialog(position, selectedItem)
-        }
+        rvAdapter = RecipeAdapter(
+            data,
+            onActionClick = { position, selectedItem ->
+                showActionDialog(position, selectedItem)
+            },
+            onWishlistClick = { item ->
+                addToWishlist(item)
+            }
+        )
 
         rvRecipe.adapter = rvAdapter
     }
@@ -322,7 +376,8 @@ class Recipe : Fragment() {
 
 class RecipeAdapter(
     private val data : MutableList<Triple<String, String, String>>,
-    private val onActionClick : (Int, Triple<String, String, String>) -> Unit
+    private val onActionClick : (Int, Triple<String, String, String>) -> Unit,
+    private val onWishlistClick: (Triple<String, String, String>) -> Unit
 ) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -348,11 +403,7 @@ class RecipeAdapter(
             onActionClick(position, data[position])
         }
         holder.btnCart.setOnClickListener {
-            Toast.makeText(
-                holder.itemView.context,
-                "Add to Wishlist clicked",
-                Toast.LENGTH_SHORT
-            ).show()
+            onWishlistClick(data[position])
         }
     }
 
