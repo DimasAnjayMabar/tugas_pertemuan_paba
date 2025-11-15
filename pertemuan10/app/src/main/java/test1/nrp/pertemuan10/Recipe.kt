@@ -1,23 +1,33 @@
 package test1.nrp.pertemuan10
 
 import android.app.AlertDialog
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.GestureDetector
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.squareup.picasso.Picasso
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,12 +50,21 @@ class Recipe : Fragment() {
 
     private lateinit var rvAdapter: RecipeAdapter
 
+    private lateinit var sharedPreferences: SharedPreferences
+
+    private val DATA_KEY = "recipe_data"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+        setHasOptionsMenu(true)
+
+        sharedPreferences = requireContext().getSharedPreferences("recipe_prefs", Context.MODE_PRIVATE)
+
+        loadData()
     }
 
     override fun onCreateView(
@@ -54,6 +73,60 @@ class Recipe : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_recipe, container, false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.appbar_button, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.action_cart -> {
+                Toast.makeText(
+                    requireContext(),
+                    "Cart Clicked",
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
+            R.id.action_add_recipe -> {
+                showAddRecipeDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun saveData(){
+        val editor = sharedPreferences.edit()
+        val gson = Gson()
+        val json = gson.toJson(data)
+        editor.putString(DATA_KEY, json)
+        editor.apply()
+    }
+
+    private fun loadData(){
+        val gson = Gson()
+        val json = sharedPreferences.getString(DATA_KEY, null)
+        val type = object : TypeToken<MutableList<Triple<String, String, String>>>() {}.type
+
+        if(json != null){
+            data = gson.fromJson(json, type)
+        }else{
+            data.addAll(listOf(
+                Triple("Utama", "Ayam", ""),
+                Triple("Utama", "Telur", "https://example.com/images/telur.jpg"),
+                Triple("Bumbu", "Bawang Merah", "https://example.com/images/bawang_merah.jpg"),
+                Triple("Bumbu", "Bawang Putih", "https://example.com/images/bawang_putih.jpg"),
+                Triple("Bumbu", "Kecap Manis", "https://example.com/images/kecap_manis.jpg"),
+                Triple("Bumbu", "Saus Tiram", "https://example.com/images/saus_tiram.jpg"),
+                Triple("Tambahan", "Garam", "https://example.com/images/garam.jpg"),
+                Triple("Tambahan", "Merica", "https://example.com/images/merica.jpg"),
+                Triple("Tambahan", "Minyak Goreng", "https://example.com/images/minyak_goreng.jpg"
+            )))
+            saveData()
+        }
     }
 
     private fun showAddRecipeDialog() {
@@ -90,6 +163,7 @@ class Recipe : Fragment() {
             if (newIngredient.isNotEmpty()) {
                 data.add(Triple(selectedCategory, newIngredient, pictureUrl))
                 rvAdapter.notifyItemInserted(data.size - 1)
+                saveData()
                 Toast.makeText(
                     requireContext(),
                     "Added $newIngredient to $selectedCategory",
@@ -115,25 +189,23 @@ class Recipe : Fragment() {
     private fun showActionDialog(
         position: Int,
         selectedItem: Triple<String, String, String>,
-        data: MutableList<Triple<String, String, String>>
     ){
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Item $selectedItem")
         builder.setMessage("What do you want to do with this data?")
 
         builder.setPositiveButton("Update"){_, _ ->
-            showUpdateDialog(position, selectedItem, data)
+            showUpdateDialog(position, selectedItem)
         }
         builder.setNegativeButton("Delete"){_, _ ->
             data.removeAt(position)
+            rvAdapter.notifyItemRemoved(position)
+            saveData()
             Toast.makeText(
                 requireContext(),
                 "$selectedItem deleted",
                 Toast.LENGTH_SHORT
             ).show()
-        }
-        builder.setNeutralButton("Add to Wishlist"){_, _ ->
-            // to do later
         }
         builder.setNeutralButton("Cancel") {dialog, _ ->
             dialog.dismiss()
@@ -145,7 +217,6 @@ class Recipe : Fragment() {
     private fun showUpdateDialog(
         position: Int,
         oldValue: Triple<String, String, String>,
-        data: MutableList<Triple<String, String, String>>,
     ) {
         val (oldCategory, oldIngredient, oldPicture) = oldValue
 
@@ -192,6 +263,7 @@ class Recipe : Fragment() {
                 // Update the data pair
                 data[position] = Triple(newCategory, newIngredient, newPicture)
                 rvAdapter.notifyItemChanged(position)
+                saveData()
                 Toast.makeText(
                     requireContext(),
                     "Updated to: $newCategory - $newIngredient",
@@ -220,27 +292,11 @@ class Recipe : Fragment() {
         rvRecipe = view.findViewById(R.id.rv_recipe)
         rvRecipe.layoutManager = LinearLayoutManager(requireContext())
 
-        rvAdapter = RecipeAdapter(data) {position, selectedItem, data ->
-            showActionDialog(position, selectedItem, data)
+        rvAdapter = RecipeAdapter(data) {position, selectedItem ->
+            showActionDialog(position, selectedItem)
         }
+
         rvRecipe.adapter = rvAdapter
-
-        data.addAll(listOf(
-            Triple("Utama", "Ayam", "https://example.com/images/ayam.jpg"),
-            Triple("Utama", "Telur", "https://example.com/images/telur.jpg"),
-            Triple("Bumbu", "Bawang Merah", "https://example.com/images/bawang_merah.jpg"),
-            Triple("Bumbu", "Bawang Putih", "https://example.com/images/bawang_putih.jpg"),
-            Triple("Bumbu", "Kecap Manis", "https://example.com/images/kecap_manis.jpg"),
-            Triple("Bumbu", "Saus Tiram", "https://example.com/images/saus_tiram.jpg"),
-            Triple("Tambahan", "Garam", "https://example.com/images/garam.jpg"),
-            Triple("Tambahan", "Merica", "https://example.com/images/merica.jpg"),
-            Triple("Tambahan", "Minyak Goreng", "https://example.com/images/minyak_goreng.jpg")
-        ))
-
-        val addBtn = view.findViewById<Button>(R.id.add_button)
-        addBtn.setOnClickListener {
-            showAddRecipeDialog()
-        }
     }
 
     companion object {
@@ -265,8 +321,8 @@ class Recipe : Fragment() {
 }
 
 class RecipeAdapter(
-    private val data : List<Triple<String, String, String>>,
-    private val onActionClick : (Int, Triple<String, String, String>, MutableList<Triple<String, String, String>>) -> Unit
+    private val data : MutableList<Triple<String, String, String>>,
+    private val onActionClick : (Int, Triple<String, String, String>) -> Unit
 ) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -280,8 +336,23 @@ class RecipeAdapter(
         val (category, ingredient, picture) = data[position]
         holder.tvCategory.text = category
         holder.tvRecipe.text = ingredient
+        if (picture.isNotEmpty()){
+            Picasso.get()
+                .load(picture)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(holder.ivPicture)
+        }else{
+            holder.ivPicture.setImageResource(R.drawable.ic_launcher_foreground)
+        }
         holder.btnAction.setOnClickListener{
-            onActionClick(position, data[position], data.toMutableList())
+            onActionClick(position, data[position])
+        }
+        holder.btnCart.setOnClickListener {
+            Toast.makeText(
+                holder.itemView.context,
+                "Add to Wishlist clicked",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -291,5 +362,7 @@ class RecipeAdapter(
         val tvCategory : TextView = view.findViewById(R.id.tv_kategori)
         val tvRecipe: TextView = view.findViewById(R.id.tv_recipe)
         val btnAction: Button = view.findViewById(R.id.btn_action)
+        val btnCart: Button = view.findViewById(R.id.btn_add_to_wishlist)
+        val ivPicture: ImageView = view.findViewById(R.id.iv_recipe)
     }
 }
