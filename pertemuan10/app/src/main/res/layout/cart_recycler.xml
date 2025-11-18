@@ -4,10 +4,10 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:id="@+id/card">
+    android:id="@+id/cart_card">
 
     <ImageView
-        android:id="@+id/iv_recipe"
+        android:id="@+id/cart_iv_recipe"
         android:layout_width="150dp"
         android:layout_height="match_parent"
         android:src="@drawable/ic_launcher_foreground"
@@ -20,7 +20,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_recipe"
+            android:id="@+id/cart_tv_recipe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Recipe Name"
@@ -28,7 +28,7 @@
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/tv_kategori"
+            android:id="@+id/cart_tv_kategori"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Recipe Category"
@@ -42,18 +42,10 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Action"
-                android:id="@+id/btn_action"
+                android:text="Check as Bought"
+                android:id="@+id/btn_delete_wishlist"
                 android:ellipsize="end"
                 android:maxLines="3" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add to Wishlist"
-                android:id="@+id/btn_add_to_wishlist"
-                android:ellipsize="end"
-                android:maxLines="3"/>
         </LinearLayout>
     </LinearLayout>
 

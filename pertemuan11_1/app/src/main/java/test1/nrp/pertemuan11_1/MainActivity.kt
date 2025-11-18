@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
 
         builder.create().show()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

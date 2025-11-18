@@ -31,15 +31,20 @@
         android:name="test1.nrp.pertemuan10.DetailFragment"
         android:label="fragment_detail"
         tools:layout="@layout/fragment_detail" />
-    <action
-        android:id="@+id/action_profileFragment_to_detailProfileFragment2"
-        app:destination="@id/detailFragment"
-        app:enterAnim="@anim/nav_default_enter_anim"
-        app:exitAnim="@anim/nav_default_exit_anim" />
     <fragment
         android:id="@+id/recipe"
         android:name="test1.nrp.pertemuan10.Recipe"
         android:label="fragment_recipe"
-        tools:layout="@layout/fragment_recipe" />
-
+        tools:layout="@layout/fragment_recipe" >
+        <action
+            android:id="@+id/action_recipe_to_cartFragment"
+            app:destination="@id/cartFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"/>
+    </fragment>
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="test1.nrp.pertemuan10.CartFragment"
+        android:label="fragment_cart"
+        tools:layout="@layout/fragment_cart" />
 </navigation>
