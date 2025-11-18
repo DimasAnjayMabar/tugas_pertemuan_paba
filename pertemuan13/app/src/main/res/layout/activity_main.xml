@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/iv_upload"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/common_google_signin_btn_icon_dark"/>
+
+    <EditText
+        android:id="@+id/et_provinsi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ketik Provinsi"/>
+
+    <EditText
+        android:id="@+id/et_ibukota"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ketik Ibukota"/>
+
+    <Button
+        android:id="@+id/btn_simpan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit"/>
+
+    <ListView
+        android:id="@+id/lv_list_provinsi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
