@@ -49,26 +49,26 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        setContentView(com.example.pertemuan13.R.layout.activity_main)
 
         val db = Firebase.firestore
         _etProvinsi=findViewById(com.example.pertemuan13.R.id.et_provinsi)
-        _etIbuKota=findViewById(R.id.etIbuKota)
-        _btnSimpan=findViewById(R.id.btnSimpan)
-        _lvData=findViewById(R.id.lvData)
-        _ivUpload = findViewById(R.id.iv_upload)
+        _etIbuKota=findViewById(com.example.pertemuan13.R.id.et_ibukota)
+        _btnSimpan=findViewById(com.example.pertemuan13.R.id.btn_simpan)
+        _lvData=findViewById(com.example.pertemuan13.R.id.lv_list_provinsi)
+        _ivUpload = findViewById(com.example.pertemuan13.R.id.iv_upload)
 
 //        lvAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_2, dataProvinsi)
         lvAdapter = SimpleAdapter(
             this,
             data,
-            R.layout.list_item_with_image,
+            com.example.pertemuan13.R.layout.list_item_with_image,
             arrayOf("Img", "Pro", "Ibu"),
-            intArrayOf(R.id.imageLogo, R.id.text1, R.id.text2)
+            intArrayOf(com.example.pertemuan13.R.id.imageLogo, com.example.pertemuan13.R.id.text1, com.example.pertemuan13.R.id.text2)
         )
 
         lvAdapter.setViewBinder { view, data, _ ->
-            if (view.id == R.id.imageLogo) {
+            if (view.id == com.example.pertemuan13.R.id.imageLogo) {
                 val imgView = view as ImageView
                 val defaultImage = com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark
                 if (data is String && data.isNotEmpty()) {
@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             showImagePickDialog()
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(com.example.pertemuan13.R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets

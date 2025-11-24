@@ -14,7 +14,6 @@ firebaseAi = "17.6.0"
 firebaseFirestoreKtx = "26.0.2"
 firebaseFirestore = "26.0.2"
 cloudinary = "3.1.2"
-glide = "5.0.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,7 +26,6 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 cloudinary = { group = "com.cloudinary", name = "cloudinary-android", version.ref = "cloudinary"}
-glide = { group = "com.github.bumptech", name = "glide", version.ref = "glide"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
