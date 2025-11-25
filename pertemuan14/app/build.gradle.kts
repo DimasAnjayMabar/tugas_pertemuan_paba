@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.pertemuan13"
+    namespace = "com.example.pertemuan14"
     compileSdk {
         version = release(36)
     }
@@ -50,4 +50,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.cloudinary)
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }

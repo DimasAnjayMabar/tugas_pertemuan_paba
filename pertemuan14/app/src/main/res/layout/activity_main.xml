@@ -33,6 +33,14 @@
         android:layout_height="wrap_content"
         android:text="Submit"/>
 
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/progress_bar_upload"
+        style="@android:attr/progressBarStyleHorizontal"
+        android:indeterminate="false"
+        android:visibility="gone"/>
+
     <ListView
         android:id="@+id/lv_list_provinsi"
         android:layout_width="match_parent"

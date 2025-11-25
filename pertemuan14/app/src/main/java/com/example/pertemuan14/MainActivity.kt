@@ -1,29 +1,29 @@
-package com.example.pertemuan13
+package com.example.pertemuan14
 
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.ArrayAdapter
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ListView
+import android.widget.ProgressBar
 import android.widget.SimpleAdapter
-import androidx.activity.R
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.cloudinary.android.MediaManager
-import com.example.pertemuan13.DcDaftarProvinsi
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.CoroutineExceptionHandler
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var _btnSimpan : Button
     lateinit var _lvData : ListView
     lateinit var _ivUpload : ImageView
+    lateinit var _progressBarUpload : ProgressBar
 
     private val CLOUDINARY_CLOUD_NAME = "djozilizv"
 
@@ -49,29 +50,35 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(com.example.pertemuan13.R.layout.activity_main)
+        setContentView(com.example.pertemuan14.R.layout.activity_main)
 
         val db = Firebase.firestore
-        _etProvinsi=findViewById(com.example.pertemuan13.R.id.et_provinsi)
-        _etIbuKota=findViewById(com.example.pertemuan13.R.id.et_ibukota)
-        _btnSimpan=findViewById(com.example.pertemuan13.R.id.btn_simpan)
-        _lvData=findViewById(com.example.pertemuan13.R.id.lv_list_provinsi)
-        _ivUpload = findViewById(com.example.pertemuan13.R.id.iv_upload)
+        _etProvinsi=findViewById(com.example.pertemuan14.R.id.et_provinsi)
+        _etIbuKota=findViewById(com.example.pertemuan14.R.id.et_ibukota)
+        _btnSimpan=findViewById(com.example.pertemuan14.R.id.btn_simpan)
+        _lvData=findViewById(com.example.pertemuan14.R.id.lv_list_provinsi)
+        _ivUpload = findViewById(com.example.pertemuan14.R.id.iv_upload)
+        _progressBarUpload = findViewById(com.example.pertemuan14.R.id.progress_bar_upload)
 
 //        lvAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_2, dataProvinsi)
         lvAdapter = SimpleAdapter(
             this,
             data,
-            com.example.pertemuan13.R.layout.list_item_with_image,
+            com.example.pertemuan14.R.layout.list_item_with_image,
             arrayOf("Img", "Pro", "Ibu"),
-            intArrayOf(com.example.pertemuan13.R.id.imageLogo, com.example.pertemuan13.R.id.text1, com.example.pertemuan13.R.id.text2)
+            intArrayOf(com.example.pertemuan14.R.id.imageLogo, com.example.pertemuan14.R.id.text1, com.example.pertemuan14.R.id.text2)
         )
 
         lvAdapter.setViewBinder { view, data, _ ->
-            if (view.id == com.example.pertemuan13.R.id.imageLogo) {
+            if (view.id == com.example.pertemuan14.R.id.imageLogo) {
                 val imgView = view as ImageView
                 val defaultImage = com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark
                 if (data is String && data.isNotEmpty()) {
+                    Glide.with(this@MainActivity)
+                        .load(data)
+                        .placeholder(defaultImage)
+                        .error(defaultImage)
+                        .into(imgView)
                 }else{
                     imgView.setImageResource(defaultImage)
                 }
@@ -104,7 +111,11 @@ class MainActivity : AppCompatActivity() {
         _lvData.adapter = lvAdapter
 
         _btnSimpan.setOnClickListener {
-            TambahData(db, _etProvinsi.text.toString(), _etIbuKota.text.toString())
+            if(selectedImageUri != null){
+                uploadToCloudinary(selectedImageUri!!, db)
+            }else{
+                TambahData(db, _etProvinsi.text.toString(), _etIbuKota.text.toString(), "")
+            }
         }
 
         ReadData(db)
@@ -116,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             showImagePickDialog()
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(com.example.pertemuan13.R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(com.example.pertemuan14.R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -152,8 +163,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showImagePickDialog(){
-        val options = arrayOf("Pilih dari gallery",
-            "Ambil foto")
+        val options = arrayOf("Pilih dari gallery", "Ambil foto")
         AlertDialog.Builder(this)
             .setTitle("Pilih gambar")
             .setItems(options){ dialog, which ->
@@ -170,8 +180,75 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    fun TambahData(db: FirebaseFirestore, provinsi : String, ibuKota : String){
-        val dataBaru = DcDaftarProvinsi(provinsi, ibuKota)
+    private fun uploadToCloudinary(uri: Uri, db: FirebaseFirestore) {
+        MediaManager.get().upload(uri)
+            .unsigned(UNSIGNED_UPLOAD_PRESET)
+            .option("folder", "cobaFirebase")
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {
+                    Log.d("Cloudinary", "Upload Start : $requestId")
+
+                    runOnUiThread {
+                        _progressBarUpload.visibility = View.VISIBLE
+                        _progressBarUpload.progress = 0
+                        _progressBarUpload.max = 100
+                    }
+                }
+
+                override fun onProgress(
+                    requestId: String?,
+                    bytes: Long,
+                    totalBytes: Long
+                ) {
+                    val progress = (bytes * 100 / totalBytes).toInt()
+                    runOnUiThread {
+                        _progressBarUpload.progress = progress
+                    }
+                }
+
+                override fun onSuccess(
+                    requestId: String?,
+                    resultData: Map<*, *>?
+                ) {
+                    var url = resultData?.get("secure_url")?.toString()
+                    Log.d("Cloudinary", "upload success : $url")
+
+                    TambahData(db, _etProvinsi.text.toString(), _etIbuKota.text.toString(), url.toString())
+
+                    runOnUiThread {
+                        _progressBarUpload.visibility = View.GONE
+                    }
+                }
+
+                override fun onError(
+                    requestId: String?,
+                    error: ErrorInfo?
+                ) {
+                    Log.d("Cloudinary", "upload error : ${error.toString()}")
+
+                    runOnUiThread {
+                        _progressBarUpload.visibility = View.GONE
+                    }
+                }
+
+                override fun onReschedule(
+                    requestId: String?,
+                    error: ErrorInfo?
+                ) {
+                    Log.d("CLoudinary", "upload reschedule : ${error.toString()}")
+
+                    runOnUiThread {
+                        _progressBarUpload.visibility = View.GONE
+                    }
+                }
+
+            }).dispatch()
+
+        Log.d("Cloudinary", "Upload with preset : ${UNSIGNED_UPLOAD_PRESET}")
+    }
+
+    fun TambahData(db: FirebaseFirestore, provinsi : String, ibuKota : String, imageUrl : String){
+        val dataBaru = DcDaftarProvinsi(provinsi, ibuKota, imageUrl)
         db.collection("tbProvinsi")
             .document(_etProvinsi.text.toString())
             .set(dataBaru)
@@ -180,6 +257,8 @@ class MainActivity : AppCompatActivity() {
                 lvAdapter.notifyDataSetChanged()
                 _etProvinsi.setText("")
                 _etIbuKota.setText("")
+                _ivUpload.setImageResource(com.google.android.gms.base.R.drawable.common_google_signin_btn_icon_dark)
+                selectedImageUri = null
                 ReadData(db)
                 Log.d("Firebase", dataBaru.provinsi + " Berhasil Ditambahkan")
             }
@@ -204,7 +283,8 @@ class MainActivity : AppCompatActivity() {
 
                     val itemdata : MutableMap<String, Any> = HashMap(2)
                     itemdata.put("Pro", item.data.get("provinsi").toString())
-                    itemdata.put("Ibu", item.data.get("ibuKota").toString())
+                    itemdata.put("Ibu", item.data.get("ibukota").toString())
+                    itemdata.put("Img", item.data.get("imageUrl").toString())
                     data.add(itemdata)
 
                 }
