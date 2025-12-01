@@ -9,14 +9,22 @@ import androidx.room.Query
 @Dao
 interface NoteDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(note : Note)
+    fun insert(note: Note)
 
-    @Query("UPDATE note SET judul=:isi_judul, deskripsi=:isi_deskripsi WHERE id=:isi_id")
+    @Query("UPDATE note SET judul = :isi_judul, deskripsi = :isi_deskripsi WHERE id = :isi_id")
     fun update(isi_judul: String, isi_deskripsi: String, isi_id: Int)
 
     @Delete
-    fun delete(note : Note)
+    fun delete(note: Note)
 
-    @Query("select * from note order by id asc")
-    fun selectAll() : MutableList<Note>
+    @Query("SELECT * FROM note ORDER BY id ASC")
+    fun selectAll(): MutableList<Note>
+
+    // Tambahkan ini untuk get note by ID
+    @Query("SELECT * FROM note WHERE id = :id")
+    fun getNoteById(id: Int): Note?
+
+    // Optional: Untuk delete by ID
+    @Query("DELETE FROM note WHERE id = :id")
+    fun deleteById(id: Int)
 }
